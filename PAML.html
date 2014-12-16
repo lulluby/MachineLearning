@@ -203,33 +203,45 @@ hr {
 <body>
 <h1>Machine learning algorithm to predict activity quality</h1>
 
+<h3>Data loading</h3>
+
 <pre><code class="r">ds &lt;- read.csv(&quot;pml-training.csv&quot;)
+</code></pre>
 
+<h3>Deleting columns where amount of NAs more than 60%</h3>
 
-NAvaluesAllowed &lt;- length(rownames(ds)) * 0.6
+<pre><code class="r">NAvaluesAllowed &lt;- length(rownames(ds)) * 0.6
 cols &lt;- apply(ds, 2, function(x) 
     length(which(!is.na(x))) &gt; NAvaluesAllowed)
 
 ds &lt;- ds[,cols]    
 </code></pre>
 
+<h3>Getting rid of variables with near zero variation</h3>
+
 <pre><code>## Loading required package: lattice
 ## Loading required package: ggplot2
 </code></pre>
+
+<h3>Remove timestamp, user, num_window column</h3>
 
 <pre><code class="r">ds &lt;- ds[, -nzv]
 ds &lt;- ds[,-grep(&quot;timestamp&quot;,colnames(ds))]
 ds &lt;- ds[,-1] #remove X column
 ds &lt;- ds[,-1] #remove user_name column
 ds &lt;- ds[,-1] # remove num_window column
+</code></pre>
 
+<h3>Dividing given dataset on train and test portions</h3>
 
-inTrain = createDataPartition(ds$classe, p = 0.6)[[1]]
+<pre><code class="r">inTrain = createDataPartition(ds$classe, p = 0.6)[[1]]
 training = ds[ inTrain,]
 testing = ds[-inTrain,]
+</code></pre>
 
+<h3>Building prediction model using random forest method</h3>
 
-library(randomForest)
+<pre><code class="r">library(randomForest)
 </code></pre>
 
 <pre><code>## randomForest 4.6-10
@@ -237,8 +249,11 @@ library(randomForest)
 </code></pre>
 
 <pre><code class="r">model1 &lt;- randomForest(classe ~ ., data = training, importance=TRUE)
+</code></pre>
 
-tds &lt;- read.csv(&quot;pml-testing.csv&quot;)
+<h3>Reading test data and predicting using our model</h3>
+
+<pre><code class="r">tds &lt;- read.csv(&quot;pml-testing.csv&quot;)
 
 colnames &lt;- colnames(training)
 tdsa &lt;- tds[,colnames[-53]]
